@@ -123,8 +123,9 @@ int main(int argc, char **argv) {
         CHECK(sn_process_spawn_shell("exit 0", &proc), "spawn shell");
 
         int code = -1;
-        CHECK(sn_process_wait(&proc, SN_TIMEOUT_INFINITE, &code) == SN_PROCESS_EXITED, "wait "
-                                                                                       "shell");
+        CHECK(sn_process_wait(&proc, SN_TIMEOUT_INFINITE, &code) == SN_PROCESS_EXITED,
+              "wait "
+              "shell");
         CHECK(code == 0, "shell exit code");
         sn_process_close(&proc);
     }
