@@ -11,5 +11,8 @@
  */
 
 #include "snprocess/api.h"
+#include "snprocess/command.h"
+#include "snprocess/pipe.h"
+#include "snprocess/process.h"
 
 #include <sncore/defines.h>
