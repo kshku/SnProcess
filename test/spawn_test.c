@@ -92,8 +92,9 @@ int main(int argc, char **argv) {
         CHECK(strcmp(buffer, "hello world\n") == 0, "stdout content");
 
         int code = -1;
-        CHECK(sn_process_wait(&proc, SN_TIMEOUT_INFINITE, &code) == SN_PROCESS_EXITED, "wait "
-                                                                                       "print");
+        CHECK(sn_process_wait(&proc, SN_TIMEOUT_INFINITE, &code) == SN_PROCESS_EXITED,
+              "wait "
+              "print");
         CHECK(code == 0, "print exit code");
         sn_process_close(&proc);
         sn_pipe_close(&out_read);
@@ -118,8 +119,9 @@ int main(int argc, char **argv) {
 
         const char *payload = "roundtrip payload";
         size_t length = strlen(payload);
-        CHECK(sn_pipe_write(&in_write, payload, (uint64_t)length) == (int64_t)length, "write "
-                                                                                      "stdin");
+        CHECK(sn_pipe_write(&in_write, payload, (uint64_t)length) == (int64_t)length,
+              "write "
+              "stdin");
         sn_pipe_close(&in_write);
 
         char buffer[128];
@@ -152,8 +154,9 @@ int main(int argc, char **argv) {
         CHECK(strcmp(buffer, "oops") == 0, "stderr content");
 
         int code = -1;
-        CHECK(sn_process_wait(&proc, SN_TIMEOUT_INFINITE, &code) == SN_PROCESS_EXITED, "wait "
-                                                                                       "stderr");
+        CHECK(sn_process_wait(&proc, SN_TIMEOUT_INFINITE, &code) == SN_PROCESS_EXITED,
+              "wait "
+              "stderr");
         CHECK(code == 5, "stderr exit code");
         sn_process_close(&proc);
         sn_pipe_close(&err_read);
@@ -287,8 +290,9 @@ int main(int argc, char **argv) {
         CHECK(sn_process_is_alive(&proc), "is_alive after timeout");
 
         CHECK(sn_process_kill(&proc, true), "kill");
-        CHECK(sn_process_wait(&proc, SN_TIMEOUT_INFINITE, &code) == SN_PROCESS_EXITED, "wait after "
-                                                                                       "kill");
+        CHECK(sn_process_wait(&proc, SN_TIMEOUT_INFINITE, &code) == SN_PROCESS_EXITED,
+              "wait after "
+              "kill");
         CHECK(!sn_process_is_alive(&proc), "is_alive after kill");
         sn_process_close(&proc);
     }
