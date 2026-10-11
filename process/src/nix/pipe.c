@@ -8,8 +8,13 @@
     #include <poll.h>
     #include <sntime/sntime.h>
     #include <string.h>
+    #include <sys/ioctl.h>
     #include <sys/socket.h>
     #include <unistd.h>
+
+    #if defined(SN_OS_MAC)
+        #include <sys/filio.h>
+    #endif
 
 typedef struct SnPipeNix {
     int fd;
@@ -128,14 +133,22 @@ SnPipeWaitStatus sn_pipe_wait(const SnPipe *pipe, uint64_t timeout_ms) {
 
         if (pfd.revents & (POLLERR | POLLNVAL)) return SN_PIPE_ERROR;
 
-        /* A peer close is reported for a socket as readability, so a readable
-           end is probed with MSG_PEEK: a zero-length result means the far end
-           sent FIN. A real pipe is not a socket and is always readable when it
-           has data. POLLHUP without POLLIN is a drained pipe whose writer is
-           gone. */
+        /* A peer close is reported for a socketpair end as readability, so a
+           readable socket is probed with MSG_PEEK: a zero-length result means
+           the far end sent FIN. A real pipe cannot be peeked, so it uses
+           FIONREAD: readable with nothing buffered means end of file. POLLHUP
+           without POLLIN is a drained pipe whose writer is gone. */
         if (pfd.revents & POLLIN) {
-            char probe;
-            if (recv(fd, &probe, 1, MSG_PEEK) == 0) return SN_PIPE_CLOSED;
+            int sock_type = 0;
+            socklen_t type_size = (socklen_t)sizeof(sock_type);
+            if (getsockopt(fd, SOL_SOCKET, SO_TYPE, &sock_type, &type_size) == 0) {
+                char probe;
+                if (recv(fd, &probe, 1, MSG_PEEK) == 0) return SN_PIPE_CLOSED;
+            } else {
+                int available = 0;
+                if (ioctl(fd, (unsigned long)FIONREAD, &available) == 0 && available == 0)
+                    return SN_PIPE_CLOSED;
+            }
             return SN_PIPE_READABLE;
         }
         if (pfd.revents & POLLHUP) return SN_PIPE_CLOSED;
